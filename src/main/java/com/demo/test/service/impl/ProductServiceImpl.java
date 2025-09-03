@@ -1,7 +1,7 @@
 package com.demo.test.service.impl;
 
-import com.demo.test.model.Customer;
-import com.demo.test.service.CustomerService;
+import com.demo.test.model.Product;
+import com.demo.test.service.ProductService;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -13,23 +13,23 @@ import java.util.*;
  */
 
 @Service
-public class CustomerServiceImpl implements CustomerService {
+public class ProductServiceImpl implements ProductService {
     // Simulamos la BD con un Map
-    private final Map<Long, Customer> store = new LinkedHashMap<>();
+    private final Map<Long, Product> store = new LinkedHashMap<>();
     private long seq = 1L;      // contador para generar IDs
 
     @Override
-    public List<Customer> findAll() {
+    public List<Product> findAll() {
         return new ArrayList<>(store.values());     // retorna todos los clientes
     }
 
     @Override
-    public Customer findById(Long id) {
+    public Product findById(Long id) {
         return store.get(id);       // busca por ID
     }
 
     @Override
-    public Customer save(Customer c) {
+    public Product save(Product c) {
         // si no tiene ID, le asignamos uno nuevo
         if (c.getId() == null) c.setId(seq++);
         store.put(c.getId(), c);    // lo guardamos en el Map

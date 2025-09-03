@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotBlank;
  * Clase modelo que representa a un Cliente.
  * Aquí definimos los atributos básicos con validaciones.
  */
-public class Customer {
+public class Product {
     private Long id;
 
     @NotBlank   // validación: no puede ser vacío
@@ -17,10 +17,10 @@ public class Customer {
     private String email;
 
     // Constructor vacío
-    public Customer() {
+    public Product() {
     }
     // Constructor con parámetros
-    public Customer(Long id, String name, String email) {
+    public Product(Long id, String name, String email) {
         this.id = id;
         this.name = name;
         this.email = email;
