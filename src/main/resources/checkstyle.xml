@@ -6,7 +6,7 @@
     <module name="TreeWalker">
         <module name="PackageName">
             <property name="format"
-                      value="com.demo.test"/>
+                      value="com.demo.taller"/>
         </module>
         <module name="MethodLength">
             <property name="max" value="50"/>
