@@ -1,0 +1,240 @@
+openapi: 3.0.3
+info:
+  title: Product Catalog API
+  version: 1.0.0
+  description: API para administrar productos y operaciones de stock/compra.
+servers:
+  - url: http://localhost:8080
+
+tags:
+  - name: Products
+    description: Operaciones sobre el catálogo
+
+paths:
+  /api/v1/products:
+    get:
+      tags: [Products]
+      summary: Listar productos
+      operationId: listProducts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Product' }
+    post:
+      tags: [Products]
+      summary: Crear producto
+      operationId: createProduct
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProductCreateRequest' }
+      responses:
+        '201':
+          description: Creado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Product' }
+        '400':
+          description: Error de validación
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/products/{id}:
+    get:
+      tags: [Products]
+      summary: Obtener por id
+      operationId: getProductById
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Product' }
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+    put:
+      tags: [Products]
+      summary: Actualizar (sin tocar stock)
+      operationId: updateProduct
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProductUpdateRequest' }
+      responses:
+        '200':
+          description: Actualizado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Product' }
+        '400':
+          description: Error de validación
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+    delete:
+      tags: [Products]
+      summary: Eliminar
+      operationId: deleteProduct
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      responses:
+        '204':
+          description: Eliminado
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/products/{id}/stock/add:
+    post:
+      tags: [Products]
+      summary: Agregar stock
+      operationId: addStock
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/StockUpdateRequest' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Product' }
+        '400':
+          description: Error de validación
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/products/{id}/purchase:
+    post:
+      tags: [Products]
+      summary: Comprar (descuenta stock)
+      operationId: purchaseProduct
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PurchaseRequest' }
+      responses:
+        '200':
+          description: Compra exitosa
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PurchaseResponse' }
+        '400':
+          description: Error de validación o stock insuficiente
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+components:
+  parameters:
+    ProductId:
+      name: id
+      in: path
+      required: true
+      schema: { type: string }
+      description: Identificador del producto (ObjectId como string)
+
+  schemas:
+    Product:
+      type: object
+      required: [id, name, price, stock]
+      properties:
+        id: { type: string, example: "66f02c0f6b1f3c0012a0cabc" }
+        name:
+          type: string
+          pattern: "^[A-Za-z0-9 ]+$"
+          example: "Keyboard MK200"
+        price:
+          type: number
+          format: double
+          minimum: 0
+          example: 129.99
+        stock:
+          type: integer
+          format: int32
+          minimum: 0
+          example: 50
+
+    ProductCreateRequest:
+      type: object
+      required: [name, price, stock]
+      properties:
+        name: { type: string, pattern: "^[A-Za-z0-9 ]+$" }
+        price: { type: number, format: double, minimum: 0 }
+        stock: { type: integer, format: int32, minimum: 0 }
+
+    ProductUpdateRequest:
+      type: object
+      required: [name, price]
+      properties:
+        name: { type: string, pattern: "^[A-Za-z0-9 ]+$" }
+        price: { type: number, format: double, minimum: 0 }
+
+    StockUpdateRequest:
+      type: object
+      required: [quantity]
+      properties:
+        quantity: { type: integer, format: int32, minimum: 1, example: 10 }
+
+    PurchaseRequest:
+      type: object
+      required: [quantity]
+      properties:
+        quantity: { type: integer, format: int32, minimum: 1, example: 3 }
+
+    PurchaseResponse:
+      type: object
+      required: [productId, quantity, remainingStock, totalAmount]
+      properties:
+        productId: { type: string }
+        quantity: { type: integer, format: int32 }
+        remainingStock: { type: integer, format: int32 }
+        totalAmount: { type: number, format: double }
+
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string, example: "VALIDATION_ERROR" }
+        message: { type: string, example: "Insufficient stock" }
+        details:
+          type: object
+          additionalProperties: true

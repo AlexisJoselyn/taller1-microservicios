@@ -1,63 +1,77 @@
 package com.demo.taller.service.impl;
 
 import com.demo.taller.model.Product;
+import com.demo.taller.model.dto.*;
 import com.demo.taller.repository.ProductRepository;
 import com.demo.taller.service.ProductService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
+import com.demo.taller.exception.NotFoundException;
+
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
 
-    private final ProductRepository repository;
+    private final ProductRepository repo;
 
-    public ProductServiceImpl(ProductRepository repository) {
-        this.repository = repository;
+    @Override
+    public List<Product> list() {
+        return repo.findAll();
     }
 
     @Override
-    public List<Product> getAllProducts() {
-        return repository.findAll();
+    public Product create(ProductCreateRequest req) {
+        Product p = Product.builder()
+                .name(req.getName())
+                .price(req.getPrice())
+                .stock(req.getStock())
+                .build();
+        return repo.save(p);
     }
 
     @Override
-    public Product getProductById(String id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+    public Product getById(String id) {
+        return repo.findById(id).orElseThrow(() -> new NotFoundException("Product not found"));
     }
 
     @Override
-    public Product createProduct(Product product) {
-        return repository.save(product);
+    public Product update(String id, ProductUpdateRequest req) {
+        Product db = getById(id);
+        db.setName(req.getName());
+        db.setPrice(req.getPrice());
+        return repo.save(db);
     }
 
     @Override
-    public Product updateProduct(String id, Product product) {
-        Product existing = getProductById(id);
-        existing.setName(product.getName());
-        existing.setPrice(product.getPrice());
-        return repository.save(existing);
+    public void delete(String id) {
+        if (!repo.existsById(id)) throw new NotFoundException("Product not found");
+        repo.deleteById(id);
+    }
+    @Override
+    public Product addStock(String id, StockUpdateRequest req) {
+        Product db = getById(id);
+        db.setStock(db.getStock() + req.getQuantity());
+        return repo.save(db);
     }
 
     @Override
-    public Product addStock(String id, int quantity) {
-        Product existing = getProductById(id);
-        existing.setStock(existing.getStock() + quantity);
-        return repository.save(existing);
-    }
-
-    @Override
-    public Product buyProduct(String id, int quantity) {
-        Product existing = getProductById(id);
-        if (existing.getStock() < quantity) {
-            throw new RuntimeException("Not enough stock");
+    public PurchaseResponse purchase(String id, PurchaseRequest req) {
+        Product db = getById(id);
+        int q = req.getQuantity();
+        Assert.isTrue(q > 0, "Quantity must be > 0");
+        if (db.getStock() < q) {
+            throw new IllegalArgumentException("Insufficient stock");
         }
-        existing.setStock(existing.getStock() - quantity);
-        return repository.save(existing);
-    }
-
-    @Override
-    public void deleteProduct(String id) {
-        repository.deleteById(id);
+        db.setStock(db.getStock() - q);
+        repo.save(db);
+        return PurchaseResponse.builder()
+                .productId(db.getId())
+                .quantity(q)
+                .remainingStock(db.getStock())
+                .totalAmount(db.getPrice() * q)
+                .build();
     }
 }
