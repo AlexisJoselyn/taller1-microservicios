@@ -57,7 +57,9 @@ Validación en MongoDB:
 Consulta en MongoDB:
 
 <img width="700" alt="Producto comprado en MongoDB" src="https://github.com/user-attachments/assets/2bc1b6db-0238-4cd7-8f96-711072144211" />
+
 5️⃣ Eliminar producto
+
 <img width="700" alt="Eliminar producto" src="https://github.com/user-attachments/assets/03866472-d0e5-4fae-87ab-c41fc98fcb85" />
 
 Validación en MongoDB:
