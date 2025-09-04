@@ -1,3 +1,12 @@
+
+Comando para levantar mongo:
+mongosh "mongodb://localhost:27017/productdb"
+
+para consultar las colecciones en mongo:
+
+use productsdb
+show collections
+db.products.find().pretty()
 registrar producto
 
 <img width="769" height="629" alt="image" src="https://github.com/user-attachments/assets/3d0c36f6-d6cb-4e34-b797-7699c222ed01" />
