@@ -191,4 +191,7 @@ Eliminar registros
 | DELETE      | `/products/{id}`       | Eliminar producto                  |
 
 ---
+## 📊 Diagrama de Secuencia - Realizar Compra
+
+![Diagrama de Secuencia](diagramas/diagramadesecuencia.png)
 
